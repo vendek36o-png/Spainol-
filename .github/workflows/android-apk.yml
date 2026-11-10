@@ -1,37 +1,33 @@
 name: Build SPAINOL APK
 
 on:
-  push:
-    branches: [ "principal" ]
   workflow_dispatch:
+  push:
+    paths:
+      - 'SPAINOL_source_v0.3.zip'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Get source code
+      - name: Checkout project
         uses: actions/checkout@v4
-
-      - name: Install Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-      - name: Install Gradle
+          java-version: '17'
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.9"
-      - name: Extract project
-        run: unzip Spainol_projet_source.zip
-
-      - name: Build APK
-        run: |
-          cd KombatCrossoverAndroid
-          gradle --no-daemon assembleDebug
-
-      - name: Save APK
+          gradle-version: '8.9'
+      - name: Extract Android project
+        run: unzip -q SPAINOL_source_v0.3.zip -d source
+      - name: Build debug APK
+        run: gradle --no-daemon -p source/KombatCrossoverAndroid assembleDebug
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: SPAINOL-APK
-          path: KombatCrossoverAndroid/app/build/outputs/apk/debug/*.apk
+          path: source/KombatCrossoverAndroid/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
